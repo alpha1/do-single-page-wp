@@ -40,18 +40,55 @@ END DEBUGGING INFO
 		console.log(SiteData);
 		document.title = html_entity_decode( SiteData.name );
 	
-		if( url.pathname === "" || url.hostname === ""){
+		//
+		url.pathname = 'alternative-email-options-to-google-gsuite-legacy-edition';
+		console.log(url.pathname);
+		console.log(endpoint + 'wp/v2/posts?slug=' + url.pathname);
 
+		if( url.pathname === ""){
+			fetch( endpoint + 'wp/v2/posts')
+				.then( ( response ) => response.json() )
+				.then( (data) => data.forEach( (post) => {
+						//console.log(post);
+						if( post.status == "publish"){
+							var tmp_post = '<article post_id="'+ post.id +'" class="post_type_'+ post.type + ' post_format_'+ post.format + '">';
+						var post_url = new URL( post.link );
+						/*
+							TODO: REMOVE TEMP CODE
+						*/
+						post_url.hostname = 'spaces.alpha1beta.blog';
+						//tmp_post += '<h2 class="post-title"><a href="'+ post.link +'">' + post.title.rendered + '</a></h2>';
+						tmp_post += '<h2 class="post-title"><a href="'+ post_url.href +'">' + post.title.rendered + '</a></h2>';
+						//tmp_post += '<h2 class="post-title"><a href="'+ url.href +'">' + post.title.rendered + '</a></h2>';
+						tmp_post += '<p>';
+						tmp_post += post.excerpt.rendered;
+						tmp_post += '</p>';
+						tmp_post += '</article>';
+						document.body.innerHTML += tmp_post;
+						delete( post_url );
+						}
+					})
+					/*
+					data.forEach( post =>
+					document.body.innerHTML += post.title
+					)
+					*/
+				);
 		} else {
-			fetch(endpoint + 'wp/v2/posts?slug' + url.pathname)
+			fetch(endpoint + 'wp/v2/posts?slug=' + url.pathname)
 			.then( ( response ) => response.json() )
 			.then(
 				( data ) => {
-					document.title = html_entity_decode( data.title.rendered + siteTitleSeparator + SiteData.name );
+					console.log(data);
+					post = data[0];
+					console.log(post)
+					document.title = html_entity_decode( post.title.rendered + siteTitleSeparator + SiteData.name );
 					var post_url = new URL( post.link );
-					var tmp_post = '<article">';
+					var tmp_post = '<article post_id="'+ post.id +'" class="post_type_'+ post.type + ' post_format_'+ post.format + '">';
 					tmp_post += '<h2 class="post-title"><a href="'+ post_url.href +'">' + post.title.rendered + '</a></h2>';
-					tmp_post += '</article">';
+					tmp_post += 'Published on ' + post.date
+					tmp_post += post.content.rendered;
+					tmp_post += '</article>';
 					document.body.innerHTML += tmp_post;
 				}
 			)
@@ -69,46 +106,6 @@ END DEBUGGING INFO
 		*/
 	})
 	.catch((e) => console.error(`Critical failure: ${e.message}`))
-	
-
-
-if( window.fetch ){
-
-if( url.pathname === "" || url.hostname === ""){
-	fetch( endpoint + 'wp/v2/posts')
-		.then( ( response ) => response.json() )
-		.then( (data) => data.forEach( (post) => {
-				//console.log(post);
-				if( post.status == "publish"){
-				var tmp_post = '<article">';
-				var post_url = new URL( post.link );
-				/*
-					TODO: REMOVE TEMP CODE
-				*/
-				post_url.hostname = 'spaces.alpha1beta.blog';
-				//tmp_post += '<h2 class="post-title"><a href="'+ post.link +'">' + post.title.rendered + '</a></h2>';
-				tmp_post += '<h2 class="post-title"><a href="'+ post_url.href +'">' + post.title.rendered + '</a></h2>';
-				//tmp_post += '<h2 class="post-title"><a href="'+ url.href +'">' + post.title.rendered + '</a></h2>';
-				tmp_post += '<p>';
-				tmp_post += post.excerpt.rendered;
-				tmp_post += '</p>';
-				tmp_post += '</article">';
-				document.body.innerHTML += tmp_post;
-				delete( post_url );
-				}
-			})
-			/*
-			data.forEach( post =>
-			document.body.innerHTML += post.title
-			)
-			*/
-		);
-		
-	}
-} else {
-
-
-}
 });
 
 </script>
