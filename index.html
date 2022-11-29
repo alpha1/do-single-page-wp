@@ -6,34 +6,78 @@
 <!--<script src="code.js"></script>-->
 <script>
 var endpoint = "https://alpha1beta.blog/wp-json/";
+var siteTitleSeparator = ' | ';
+
 function html_entity_decode( rawStr ) {
   return rawStr.replace(/&#(\d+);/g, ((match, dec) => `${String.fromCharCode(dec)}`));
 }
 
+async function getSiteData(){
+	const response = await fetch( endpoint );
+	return response.json();
+}
 
+async function router_handler(){
+	const SiteData = await getSiteData();
+	return SiteData;
+}
 
 document.addEventListener('DOMContentLoaded', function() {
+/*
+START DEBUGGING INFO
+*/
 console.log( window.location.href );
 const url = new URL( window.location.href );
 console.log(url.href);
 console.log(url.pathname);
+/*
+END DEBUGGING INFO
+*/
+
+	router_handler()
+	.then( 
+		(SiteData) => {
+		console.log(SiteData);
+		document.title = html_entity_decode( SiteData.name );
+	
+		if( url.pathname === "" || url.hostname === ""){
+
+		} else {
+			fetch(endpoint + 'wp/v2/posts?slug' + url.pathname)
+			.then( ( response ) => response.json() )
+			.then(
+				( data ) => {
+					document.title = html_entity_decode( data.title.rendered + siteTitleSeparator + SiteData.name );
+					var post_url = new URL( post.link );
+					var tmp_post = '<article">';
+					tmp_post += '<h2 class="post-title"><a href="'+ post_url.href +'">' + post.title.rendered + '</a></h2>';
+					tmp_post += '</article">';
+					document.body.innerHTML += tmp_post;
+				}
+			)
+		}
+
+		console.log(SiteData.routes);
+
+
+
+		SiteData.routes.forEach( (route ) => {
+			const regex = new RegExp ();
+
+			delete (regex);
+		})
+	})
+	.catch((e) => console.error(`Critical failure: ${e.message}`))
+	
+
 
 if( window.fetch ){
-    fetch( endpoint )
-		.then( ( response ) => response.json() )
-		//.then( ( data ) => console.log( data ) )
-		//.then( data => { return data })
-		.then( 
-		( data ) => 
-		document.title = html_entity_decode( data.name ) 
-		//document.getElementsByTagName('head')[0].appendChild('<meta property="og:title" content="'+ data.name + '"/>';
-		)
-		.catch((e) => console.error(`Critical failure: ${e.message}`));
 
+if( url.pathname === "" || url.hostname === ""){
 	fetch( endpoint + 'wp/v2/posts')
 		.then( ( response ) => response.json() )
 		.then( (data) => data.forEach( (post) => {
-				console.log(post);
+				//console.log(post);
 				if( post.status == "publish"){
 				var tmp_post = '<article">';
 				var post_url = new URL( post.link );
@@ -60,7 +104,12 @@ if( window.fetch ){
 		);
 		
 	}
+} else {
+
+
+}
 });
+
 </script>
 <title></title>
 </head>
