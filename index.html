@@ -45,7 +45,7 @@ END DEBUGGING INFO
 		console.log(url.pathname);
 		console.log(endpoint + 'wp/v2/posts?slug=' + url.pathname);
 
-		if( url.pathname === ""){
+		if( url.pathname === "" || url.pathname === "/" ){
 			fetch( endpoint + 'wp/v2/posts')
 				.then( ( response ) => response.json() )
 				.then( (data) => data.forEach( (post) => {
