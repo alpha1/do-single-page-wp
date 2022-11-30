@@ -40,7 +40,15 @@ END DEBUGGING INFO
 		(SiteData) => {
 		console.log(SiteData);
 		document.title = html_entity_decode( SiteData.name );
-		document.head.innerHTML = '<link rel="alternate" type="application/rss+xml" title="'+ html_entity_decode( SiteData.name ) +'" href="'+ url.protocol + url.hostname + 'feed" />'
+		
+		if(typeof SiteData.theme_stylesheet !== "undefined" ){
+			document.head.innerHTML = '<link rel="stylesheet" id="'+ SiteData.template +'-style-css" href="'+ SiteData.theme_stylesheet +'" media="all" />';
+		}
+		
+		do
+		document.head.innerHTML = '<link rel="alternate" type="application/rss+xml" title="'+ html_entity_decode( SiteData.name ) +'" href="'+ url.protocol + '//'. url.hostname + '/' 'feed" />'
+		
+		
 	
 		//
 		console.log(url.pathname);
