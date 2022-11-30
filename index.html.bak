@@ -6,48 +6,109 @@
 <!--<script src="code.js"></script>-->
 <script>
 var endpoint = "https://alpha1beta.blog/wp-json/";
+var siteTitleSeparator = ' | ';
+
 function html_entity_decode( rawStr ) {
   return rawStr.replace(/&#(\d+);/g, ((match, dec) => `${String.fromCharCode(dec)}`));
 }
 
+async function getSiteData(){
+	const response = await fetch( endpoint );
+	return response.json();
+}
+
+async function router_handler(){
+	const SiteData = await getSiteData();
+	return SiteData;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+/*
+START DEBUGGING INFO
+*/
+console.log( window.location.href );
+const url = new URL( window.location.href );
+console.log(url);
+console.log(url.href);
+console.log(url.pathname);
+/*
+END DEBUGGING INFO
+*/
 
+	router_handler()
+	.then( 
+		(SiteData) => {
+		console.log(SiteData);
+		document.title = html_entity_decode( SiteData.name );
+		document.head.innerHTML = '<link rel="alternate" type="application/rss+xml" title="'+ html_entity_decode( SiteData.name ) +'" href="https://example.com/podcast.xml" />'
+	
+		//
+		console.log(url.pathname);
+		console.log(endpoint + 'wp/v2/posts?slug=' + url.pathname);
 
-if( window.fetch ){
-    fetch( endpoint )
-		.then( ( response ) => response.json() )
-		//.then( ( data ) => console.log( data ) )
-		//.then( data => { return data })
-		.then( 
-		( data ) => 
-		document.title = html_entity_decode( data.name ) 
-		//document.getElementsByTagName('head')[0].appendChild('<meta property="og:title" content="'+ data.name + '"/>';
-		)
-		.catch((e) => console.error(`Critical failure: ${e.message}`));
-
-	fetch( endpoint + 'wp/v2/posts')
-		.then( ( response ) => response.json() )
-		.then( (data) => data.forEach( (post) => {
-				console.log(post);
-				if( post.status == "publish"){
-				var tmp_post = '<article">';
-				tmp_post += '<h2 class="post-title"><a href="'+ post.link +'">' + post.title.rendered + '</a></h2>';
-				tmp_post += '<p>';
-				tmp_post += post.excerpt.rendered;
-				tmp_post += '</p>';
-				tmp_post += '</article">';
-				document.body.innerHTML += tmp_post;
+		if( url.pathname === "" || url.pathname === "/" ){
+			fetch( endpoint + 'wp/v2/posts')
+				.then( ( response ) => response.json() )
+				.then( (data) => data.forEach( (post) => {
+						//console.log(post);
+						if( post.status == "publish"){
+							var tmp_post = '<article post_id="'+ post.id +'" class="post_type_'+ post.type + ' post_format_'+ post.format + '">';
+						var post_url = new URL( post.link );
+						/*
+							TODO: REMOVE TEMP CODE
+						*/
+						post_url.hostname = 'spaces.alpha1beta.blog';
+						//tmp_post += '<h2 class="post-title"><a href="'+ post.link +'">' + post.title.rendered + '</a></h2>';
+						tmp_post += '<h2 class="post-title"><a href="'+ post_url.href +'">' + post.title.rendered + '</a></h2>';
+						//tmp_post += '<h2 class="post-title"><a href="'+ url.href +'">' + post.title.rendered + '</a></h2>';
+						tmp_post += '<p>';
+						tmp_post += post.excerpt.rendered;
+						tmp_post += '</p>';
+						tmp_post += '</article>';
+						document.body.innerHTML += tmp_post;
+						delete( post_url );
+						}
+					})
+					/*
+					data.forEach( post =>
+					document.body.innerHTML += post.title
+					)
+					*/
+				);
+		} else {
+			fetch(endpoint + 'wp/v2/posts?slug=' + url.pathname)
+			.then( ( response ) => response.json() )
+			.then(
+				( data ) => {
+					console.log(data);
+					post = data[0];
+					console.log(post);
+					document.title = html_entity_decode( post.title.rendered + siteTitleSeparator + SiteData.name );
+					var post_url = new URL( post.link );
+					var tmp_post = '<article post_id="'+ post.id +'" class="post_type_'+ post.type + ' post_format_'+ post.format + '">';
+					tmp_post += '<h2 class="post-title"><a href="'+ post_url.href +'">' + post.title.rendered + '</a></h2>';
+					tmp_post += 'Published on ' + post.date
+					tmp_post += post.content.rendered;
+					tmp_post += '</article>';
+					document.body.innerHTML += tmp_post;
 				}
-			})
-			/*
-			data.forEach( post =>
-			document.body.innerHTML += post.title
 			)
-			*/
-		);
-		
-	}
+		}
+		/*
+		console.log(SiteData.routes);
+
+
+
+		SiteData.routes.forEach( (route ) => {
+			const regex = new RegExp ();
+
+			delete (regex);
+		})
+		*/
+	})
+	.catch((e) => console.error(`Critical failure: ${e.message}`))
 });
+
 </script>
 <title></title>
 </head>

@@ -28,6 +28,7 @@ START DEBUGGING INFO
 */
 console.log( window.location.href );
 const url = new URL( window.location.href );
+console.log(url);
 console.log(url.href);
 console.log(url.pathname);
 /*
@@ -39,6 +40,7 @@ END DEBUGGING INFO
 		(SiteData) => {
 		console.log(SiteData);
 		document.title = html_entity_decode( SiteData.name );
+		document.head.innerHTML = '<link rel="alternate" type="application/rss+xml" title="'+ html_entity_decode( SiteData.name ) +'" href="https://example.com/podcast.xml" />'
 	
 		//
 		console.log(url.pathname);
@@ -80,7 +82,8 @@ END DEBUGGING INFO
 				( data ) => {
 					console.log(data);
 					post = data[0];
-					console.log(post)
+					console.log(post);
+					if( post !== undefined){
 					document.title = html_entity_decode( post.title.rendered + siteTitleSeparator + SiteData.name );
 					var post_url = new URL( post.link );
 					var tmp_post = '<article post_id="'+ post.id +'" class="post_type_'+ post.type + ' post_format_'+ post.format + '">';
@@ -89,6 +92,9 @@ END DEBUGGING INFO
 					tmp_post += post.content.rendered;
 					tmp_post += '</article>';
 					document.body.innerHTML += tmp_post;
+					} else {
+						//post not found
+					}
 				}
 			)
 		}
