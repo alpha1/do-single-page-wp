@@ -47,9 +47,11 @@ END DEBUGGING INFO
 			document.head.innerHTML += '<link rel="stylesheet" id="'+ SiteData.template +'-style-css" href="'+ SiteData.theme_stylesheet +'" media="all" />';
 		}
 		
-		
-		document.head.innerHTML += '<link rel="alternate" type="application/rss+xml" title="'+ html_entity_decode( SiteData.name ) +'" href="'+ SiteData.url +'/feed" />'
-		
+		if( SiteData.site_rss_url ){
+			document.head.appendChild( '<link rel="alternate" type="application/rss+xml" title="'+ html_entity_decode( SiteData.name ) +'" href="'+ SiteData.site_rss_url + '"/>');
+		} else {
+			document.head.innerHTML += '<link rel="alternate" type="application/rss+xml" title="'+ html_entity_decode( SiteData.name ) +'" href="'+ SiteData.url +'/feed" />'
+		}
 		
 	
 		//
