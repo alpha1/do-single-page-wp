@@ -83,6 +83,7 @@ END DEBUGGING INFO
 					console.log(data);
 					post = data[0];
 					console.log(post);
+					if( post !== undefined){
 					document.title = html_entity_decode( post.title.rendered + siteTitleSeparator + SiteData.name );
 					var post_url = new URL( post.link );
 					var tmp_post = '<article post_id="'+ post.id +'" class="post_type_'+ post.type + ' post_format_'+ post.format + '">';
@@ -91,6 +92,9 @@ END DEBUGGING INFO
 					tmp_post += post.content.rendered;
 					tmp_post += '</article>';
 					document.body.innerHTML += tmp_post;
+					} else {
+						//post not found
+					}
 				}
 			)
 		}
