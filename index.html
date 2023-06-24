@@ -120,7 +120,7 @@ END DEBUGGING INFO
 					var post_url = new URL( post.link );
 					
 					document.head.innerHTML += '<meta property="og:title" content="'+ post.title.rendered +'">';
-					document.head.innerHTML += '<link rel="alternate" type="application/json" href="'. + post_url.href + .'">';
+					document.head.innerHTML += '<link rel="alternate" type="application/json" href="'+ post_url.href + '">';
 					document.head.innerHTML += '<link rel="canonical" href="'+ post_url.href +'">';
 					
 					//document.head.innerHTML += '<link rel="shortlink" href="'+ post_url.href +'">'; //TODO
