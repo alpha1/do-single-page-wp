@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!--<script src="code.js"></script>-->
 <script>
-var endpoint = "https://alpha1beta.blog/wp-json/";
+var site_host = "https://alpha1beta.blog";
+var endpoint = site_host + "/wp-json/";
 var siteTitleSeparator = ' | ';
 
 function html_entity_decode( rawStr ) {
@@ -22,15 +23,34 @@ async function router_handler(){
 	return SiteData;
 }
 
+function display_semantic_post_timestamp( $timestamp ){
+	return '<time datetime="'++'"></time>';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 /*
 START DEBUGGING INFO
 */
-console.log( window.location.href );
+//console.log( location.hostname );
+//console.log( window.location.href );
 const url = new URL( window.location.href );
-console.log(url);
-console.log(url.href);
-console.log(url.pathname);
+//console.log(url);
+//console.log(url.href);
+//console.log(url.pathname);
+
+/*
+Local fix
+*/
+if( url.hostname === "" && window.location.href.startsWith('file:///') ){
+	url.hostname = site_host;
+	if( window.location.href.endsWith('/index.html') ){
+		console.log("ends with");
+		url.pathname = "/";
+	} else {
+		console.log("not end with");
+	}
+}
+
 /*
 END DEBUGGING INFO
 */
@@ -40,9 +60,7 @@ END DEBUGGING INFO
 		(SiteData) => {
 		console.log(SiteData);
 		document.title = html_entity_decode( SiteData.name );
-		console.log("SS");
-		console.log(SiteData.theme_stylesheet);
-		
+	
 		if(typeof SiteData.theme_stylesheet !== undefined ){
 			document.head.innerHTML += '<link rel="stylesheet" id="'+ SiteData.template +'-style-css" href="'+ SiteData.theme_stylesheet +'" media="all" />';
 		}
@@ -55,6 +73,7 @@ END DEBUGGING INFO
 		
 	
 		//
+		
 		console.log(url.pathname);
 		console.log(endpoint + 'wp/v2/posts?slug=' + url.pathname);
 
@@ -65,7 +84,7 @@ END DEBUGGING INFO
 						//console.log(post);
 						if( post.status == "publish"){
 							var tmp_post = '<article post_id="'+ post.id +'" class="post_type_'+ post.type + ' post_format_'+ post.format + '">';
-						var post_url = new URL( post.link );
+							var post_url = new URL( post.link );
 						/*
 							TODO: REMOVE TEMP CODE
 						*/
@@ -98,6 +117,15 @@ END DEBUGGING INFO
 					if( post !== undefined){
 					document.title = html_entity_decode( post.title.rendered + siteTitleSeparator + SiteData.name );
 					var post_url = new URL( post.link );
+					
+					document.head.innerHTML += '<meta property="og:title" content="'+ post.title.rendered +'">';
+					document.head.innerHTML += '<link rel="alternate" type="application/json" href="'. + post_url.href + .'">';
+					document.head.innerHTML += '<link rel="canonical" href="'+ post_url.href +'">';
+					
+					//document.head.innerHTML += '<link rel="shortlink" href="'+ post_url.href +'">'; //TODO
+					//document.head.innerHTML += '<link rel="alternate" type="application/json+oembed" href="'+ post_url.href +'">'; //TODO
+					//document.head.innerHTML += '<link rel="alternate" type="text/xml+oembed" href="'+ post_url.href +'">'; //TODO
+					//
 					var tmp_post = '<article post_id="'+ post.id +'" class="post_type_'+ post.type + ' post_format_'+ post.format + '">';
 					tmp_post += '<h2 class="post-title"><a href="'+ post_url.href +'">' + post.title.rendered + '</a></h2>';
 					tmp_post += 'Published on ' + post.date
